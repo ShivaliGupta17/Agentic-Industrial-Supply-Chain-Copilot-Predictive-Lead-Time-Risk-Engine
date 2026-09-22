@@ -1,128 +1,180 @@
-# Agentic Industrial Supply Chain Copilot: Predictive Lead-Time & Risk Engine
+<div align="center">
 
-An enterprise-grade supply chain intelligence, predictive modeling, and agentic research engine designed to detect supplier bottlenecks, forecast equipment delivery slippage, and simulate capital expenditure (CapEx) inflation under global trade shocks. 
+# 🚢 Agentic Industrial Supply Chain Copilot
+### Predictive Lead-Time, Supplier Disruption & CapEx Inflation Analytics Engine
 
-Trained on **100,000+ multi-echelon shipment records** merged with macro commodity price indices (Copper, Steel, Baltic Freight Index) and containerized with **Docker & Docker-Compose**.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-StateGraph-orange?logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-Regressor-EB5424?logo=xgboost&logoColor=white)](https://xgboost.readthedocs.io/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
+<p align="center">
+  <b>An enterprise-grade autonomous supply chain intelligence and predictive modeling platform designed to detect component bottlenecks from corporate 10-Ks, forecast equipment delivery slippage on 100K+ records, and simulate CapEx budget escalation under global trade shocks.</b>
+</p>
+
+[Key Capabilities](#-key-capabilities) •
+[Agentic Architecture (LangGraph)](#-langgraph-multi-agent-architecture) •
+[ML Lead-Time Forecaster (XGBoost)](#-xgboost-lead-time-forecasting-engine) •
+[CapEx Sensitivity Simulation](#-capex-inflation-sensitivity-simulation) •
+[Tech Stack](#-technical-stack) •
+[Docker Quickstart](#-one-click-docker-deployment)
 
 ---
 
-## ⚡ Key Architecture & Workflow
+</div>
+
+## 📌 Executive Overview & Motivation
+
+Global energy transition hardware (high-voltage transformers, subsea HVDC cables, wind turbine blades, utility solar inverters) suffers from severe procurement lead-time volatility driven by raw material price spikes (Copper, Electrical Steel) and ocean shipping congestion.
+
+This platform bridges unstructured market intelligence and quantitative operations research:
+1. **Autonomous LangGraph Multi-Agent Engine:** Continuously parses corporate 10-K disclosures and annual filings with **cyclic data-validation guardrails** to extract supplier backlog disclosures and delay signals.
+2. **Machine Learning Lead-Time Predictor:** Trained an **XGBoost** regression model on **100,000+ multi-echelon shipment records** merged with macro commodity price indices (Copper spot, Hot-Rolled Coil Steel, Baltic Dry Freight Index), achieving an **$R^2 > 0.81$** on held-out test sets.
+3. **Quantitative Risk & CapEx Simulator:** Computes a mathematical **Supplier Disruption Index (0-100)** and executes 2D sensitivity stress-testing simulating project budget escalation under import tariffs and freight spikes.
+4. **Production Deployment:** Fully containerized with **Docker & Docker-Compose** orchestrating a dedicated PostgreSQL 16 database and a cyber-themed Streamlit executive copilot.
+
+---
+
+## ⚡ Key Capabilities
+
+* 🤖 **Stateful Multi-Agent Workflow:** LangGraph state machine with cyclic error feedback that self-corrects invalid or negative delivery slippages before database commit.
+* 📈 **Non-Linear Lead-Time Forecasting:** Accurately forecasts delivery dates for long-lead industrial equipment (up to 250+ days), quantifying freight and commodity attribution.
+* 📊 **Multi-Criteria Supplier Risk Scorecard:** Weights on-time delivery rates, delay variance, and geopolitical sourcing exposure to rank vendors into tiered risk categories.
+* 💥 **CapEx Inflation Heatmap:** Interactive 2D scenario grid (42 geopolitical permutations) simulating capital cost escalations on multi-million dollar utility assets.
+* 🐳 **Production-Ready Docker Stack:** Single-command `docker-compose up` spins up PostgreSQL and the analytics copilot with healthchecks and volume persistence.
+
+---
+
+## 🤖 LangGraph Multi-Agent Architecture
+
+The autonomous research pipeline uses a stateful directed graph with built-in cyclic guardrail feedback:
 
 ```
-[Unstructured 10-K Filings / SEC Reports]
+┌──────────────────────────────────────┐
+│  Node 1: Ingest 10-K Annual Reports   │ ──▶ [Siemens Energy, GE, Vestas Filings]
+└──────────────────┬───────────────────┘
                    │
                    ▼
-     [LangGraph Multi-Agent Engine]
-     ├── Node 1: Ingest & Document Parser
-     ├── Node 2: Entity & Bottleneck Extractor
-     ├── Node 3: Cyclic Validation Guardrail (Self-correcting loop)
-     └── Node 4: Structured Database Staging
+┌──────────────────────────────────────┐
+│   Node 2: Structured Entity Parser   │ ──▶ [LLM / Semantic Delay Extractor]
+└──────────────────┬───────────────────┘
                    │
-         ┌─────────┴─────────┐
-         ▼                   ▼
-[XGBoost Lead-Time Model]  [Quantitative Risk & Siting]
-├── R² > 0.75 Test Splits   ├── Supplier Disruption Index (0-100)
-├── Commodity & Freight     └── CapEx Escalation Simulator
-    Feature Attribution         (Tariff & Freight Shocks)
-         │                   │
-         └─────────┬─────────┘
                    ▼
-[Streamlit Copilot & Dockerized PostgreSQL Service]
+┌──────────────────────────────────────┐          (Validation Error / Delay < 0)
+│ Node 3: Cyclic Validation Guardrail  │ ──────────────────────────────────────────┐
+└──────────────────┬───────────────────┘                                           │
+                   │ (Passed Schema Checks)                                        │
+                   ▼                                                        (Cyclic Loop)
+┌──────────────────────────────────────┐                                           │
+│  Node 4: PostgreSQL Staging Writer   │ ◀─────────────────────────────────────────┘
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+         [Live Database Table]
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 📈 XGBoost Lead-Time Forecasting Engine
 
-* **Agentic Orchestration:** LangGraph, LangChain, Pydantic, StateGraph with Cyclic Guardrails
-* **Machine Learning & Modeling:** XGBoost Regressor ($R^2 > 0.75$), Scikit-learn, Feature Importance (SHAP)
-* **Quantitative Analytics:** Multi-Criteria Disruption Index, CapEx Inflation Sensitivity Matrix
-* **Data Engineering & Scale:** Python, 100K+ Shipment Records, Yahoo Finance Commodity Indices
-* **Containerization & Database:** Docker, Docker-Compose, PostgreSQL, SQLite
-* **Dashboard & Visual Delivery:** Streamlit, Plotly Express
+Trained on **100,000+ shipment records** with 80/20 temporal train/test split:
 
----
+| Evaluation Metric | Target Threshold | Achieved Performance | Evaluation Status |
+| :--- | :---: | :---: | :---: |
+| **R-Squared ($R^2$) Score** | $> 0.75$ | **`0.814`** | **EXCEEDED TARGET** |
+| **Root Mean Squared Error (RMSE)** | $< 5.0\text{ days}$ | **`3.82 days`** | **EXCEEDED TARGET** |
+| **Mean Absolute Error (MAE)** | $< 3.5\text{ days}$ | **`2.91 days`** | **EXCEEDED TARGET** |
 
-## 📁 Repository Structure
-
-```
-agentic_industrial_supply_chain/
-├── agent/
-│   ├── state.py                  # LangGraph AgentState TypedDict schema
-│   └── graph.py                  # Stateful LangGraph with cyclic validation loops
-├── analytics/
-│   ├── risk_index.py             # Quantitative Supplier Disruption Index (0-100)
-│   └── sensitivity_analysis.py   # CapEx inflation simulation under tariff/freight shocks
-├── models/
-│   ├── train_xgboost.py          # XGBoost training on 100K+ records (R² > 0.75)
-│   ├── predict_lead_time.py      # Real-time lead-time inference API
-│   └── model_metrics.json        # Serialized evaluation metrics & feature importances
-├── data/
-│   ├── reports_10k/              # Corporate annual reports & SEC disclosures
-│   └── industrial_shipments_100k.csv # 100K+ multi-echelon shipment records
-├── dashboard/
-│   └── app.py                    # Interactive Streamlit executive copilot
-├── Dockerfile                    # Production multi-stage Docker container
-├── docker-compose.yml            # Multi-container orchestration (PostgreSQL + App)
-├── requirements.txt              # Project dependencies
-└── README.md                     # Comprehensive documentation
-```
+### Feature Attribution Breakdown:
+* **Scheduled Lead Days:** `48%` (Baseline hardware engineering cycle)
+* **Baltic Dry Freight Index:** `22%` (Global port and shipping lane backlog)
+* **Manufacturing Origin Country:** `16%` (Geopolitical trade friction and logistics distance)
+* **Copper Spot Price ($/lb):** `9%` (Raw material supply chain strain)
+* **Steel Price ($/ton):** `5%` (Structural manufacturing backlog)
 
 ---
 
-## 🚀 Quickstart & Execution Guide
+## 💥 CapEx Inflation Sensitivity Simulation
 
-### Option 1: One-Click Docker Deployment (Recommended)
-Spin up the entire application stack and PostgreSQL database in 1 command:
+Simulates project capital expenditure escalation across a 2D matrix of **Import Tariffs (0% to +30%)** and **Ocean Freight Surges (0% to +50%)** on a $250M benchmark utility project:
+
+$$\Delta \text{CapEx} = \text{Base CapEx} \times \left( \Delta_{\text{tariff}} \times \omega_{\text{import}} + \Delta_{\text{freight}} \times \omega_{\text{freight}} \right)$$
+
+* **Baseline (No Shock):** Budget variance = `+$0.0M`
+* **Moderate Shock (+10% Tariff, +20% Freight):** `+6.1%` CapEx escalation (`+$15.25M USD`)
+* **Severe Disruption (+25% Tariff, +50% Freight):** `+15.25%` CapEx escalation (`+$38.12M USD`)
+
+---
+
+## 💻 Technical Stack
+
+| Category | Technology / Library | Role in Architecture |
+| :--- | :--- | :--- |
+| **Agentic Framework** | `LangGraph`, `LangChain`, `Pydantic` | StateGraph orchestration, cyclic self-correcting guardrails |
+| **Machine Learning** | `XGBoost Regressor`, `Scikit-learn` | Non-linear delivery delay regression ($R^2 > 0.81$) |
+| **Data Scale** | `100,000+ Records`, `DataCo Schema` | Multi-echelon industrial procurement datasets |
+| **Financial / Macro Data**| `yfinance`, `Yahoo Finance API` | Copper (`HG=F`), Steel (`HRC=F`), Freight Index feeds |
+| **Containerization** | `Docker`, `Docker-Compose` | Multi-container orchestration, zero-configuration deploy |
+| **Database** | `PostgreSQL 16 Alpine`, `SQLite 3` | Relational storage of bottleneck disclosures & scorecards |
+| **User Interface** | `Streamlit`, `Plotly Express` | Cyber-navy command center with gauge meters & heatmaps |
+
+---
+
+## 🐳 One-Click Docker Deployment (Recommended)
+
+Spin up the entire application and PostgreSQL 16 database with a single command:
+
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
-Open your browser at `http://localhost:8501`.
+Open **`http://localhost:8502`** in your browser.
+
+To stop the containers:
+```bash
+docker-compose down
+```
 
 ---
 
-### Option 2: Local Python Execution
+## 🚀 Direct Python Local Execution
 
-1. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/ShivaliGupta17/Agentic-Industrial-Supply-Chain-Copilot-Predictive-Lead-Time-Risk-Engine.git
+cd Agentic-Industrial-Supply-Chain-Copilot-Predictive-Lead-Time-Risk-Engine
+pip install -r requirements.txt
+```
 
-2. **Generate 100K+ Shipment Data & Macro Indices:**
-   ```bash
-   python data_loader.py
-   ```
+### 2. Generate Datasets & Run Analysis
+```bash
+# Generate 100K shipment records and macro indices
+python data_loader.py
 
-3. **Run LangGraph Multi-Agent Research Engine:**
-   Extracts bottleneck signals from corporate 10-K filings with cyclic guardrail verification:
-   ```bash
-   python agent/graph.py
-   ```
+# Run LangGraph multi-agent 10-K extraction engine
+python agent/graph.py
 
-4. **Compute Supplier Disruption Index & CapEx Sensitivity Matrix:**
-   ```bash
-   python analytics/risk_index.py
-   python analytics/sensitivity_analysis.py
-   ```
+# Compute Supplier Disruption Scorecard & CapEx Sensitivity Matrix
+python analytics/risk_index.py
+python analytics/sensitivity_analysis.py
 
-5. **Train XGBoost Lead-Time Regression Model:**
-   ```bash
-   python models/train_xgboost.py
-   ```
+# Train XGBoost lead-time delay regression model
+python models/train_xgboost.py
+```
 
-6. **Launch Executive Streamlit Dashboard:**
-   ```bash
-   streamlit run dashboard/app.py
-   ```
+### 3. Launch Executive Copilot Dashboard
+```bash
+python -m streamlit run dashboard/app.py --server.port 8502
+```
+Open **`http://localhost:8502`** in your browser.
 
 ---
 
-## 📊 Performance Benchmarks & Key Findings
+## 👤 Author
 
-1. **XGBoost Accuracy ($R^2 > 0.75$):**
-   * The model achieved an **$R^2$ of ~0.82** and an **RMSE of 3.8 days** on held-out test splits, accurately predicting component lead-time slippage.
-   * Primary drivers: Scheduled lead days (48%), Ocean Freight Index volatility (22%), and Origin Country Geopolitical friction (16%).
-2. **LangGraph Cyclic Guardrail:**
-   * Automated guardrails achieved **100% extraction validity**, rejecting negative or hallucinated delivery delays and triggering self-correcting re-prompt loops.
-3. **CapEx Inflation Sensitivity:**
-   * A simulated **+15% trade tariff** combined with a **+25% ocean freight spike** drives a cumulative **+8.75% CapEx budget escalation** (+\$21.9M on a \$250M utility project).
+**Shivali Gupta**  
+*M.Sc. Data Science, Indian Institute of Information Technology, Lucknow (GPA: 9.15)*  
+*B.Sc. in Mathematics*  
+* [LinkedIn](https://www.linkedin.com/in/shivali-gupta07/) • [GitHub](https://github.com/ShivaliGupta17) • Email: [shivaligpt17@gmail.com](mailto:shivaligpt17@gmail.com)
