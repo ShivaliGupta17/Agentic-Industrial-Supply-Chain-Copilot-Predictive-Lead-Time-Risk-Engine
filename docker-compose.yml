@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Service 1: PostgreSQL Enterprise Relational Database
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: supply_chain_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: supply_chain_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Service 2: Agentic Supply Chain Analytics & Copilot App
+  supply-chain-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supply_chain_copilot_app
+    restart: on-failure
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres-db:5432/supply_chain_db
+      - PORT=8501
+    ports:
+      - "8501:8501"
+
+volumes:
+  pgdata:
