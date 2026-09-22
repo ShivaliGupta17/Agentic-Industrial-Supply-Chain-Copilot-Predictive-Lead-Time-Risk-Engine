@@ -1,11 +1,10 @@
 """
 Agentic Industrial Supply Chain Copilot: Executive Command Center
-Redesigned with a distinct Industrial Operations Hub style (Sidebar Navigation, Metric Gauges, Risk Badges).
+Dark Cyber-Navy Industrial Theme with Live Text Input, Optional LLM API Key, and Dynamic SCM Simulation.
 """
 
 import os
 import sys
-import csv
 import json
 import sqlite3
 import pandas as pd
@@ -14,12 +13,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# Ensure root directory is in sys.path to resolve any ModuleNotFoundError
+# Ensure root directory is in sys.path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from models.predict_lead_time import predict_lead_time_delay
+from agent.graph import build_and_run_langgraph_workflow
 
 # Page Configuration
 st.set_page_config(
@@ -29,65 +29,78 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Enterprise Industrial CSS Styling
+# Dark Cyber-Navy Industrial CSS Theme
 st.markdown("""
 <style>
-    /* Industrial Theme Styling */
+    /* Dark Navy Background & Text Colors */
+    .stApp {
+        background-color: #0A0E17;
+        color: #E2E8F0;
+    }
+    
+    /* Header Branding */
     .command-header {
         font-size: 2.3rem;
         font-weight: 800;
         letter-spacing: -0.5px;
-        color: #0F172A;
+        color: #38BDF8;
         display: flex;
         align-items: center;
         gap: 12px;
+        margin-bottom: 4px;
     }
     .command-sub {
-        font-size: 1.05rem;
-        color: #64748B;
+        font-size: 1.0rem;
+        color: #94A3B8;
         margin-bottom: 1.5rem;
     }
+    
+    /* Glassmorphic Cyber Cards */
     .stat-card {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-        border: 1px solid #E2E8F0;
+        background: linear-gradient(135deg, #111827 0%, #1E293B 100%);
+        border: 1px solid #334155;
         border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease;
+        padding: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     .stat-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         font-weight: 700;
-        color: #64748B;
+        color: #94A3B8;
     }
     .stat-number {
-        font-size: 2.0rem;
+        font-size: 1.9rem;
         font-weight: 800;
-        color: #0F172A;
+        color: #F8FAFC;
         margin: 4px 0;
     }
+    
+    /* Status Badges */
     .badge-critical {
-        background-color: #FEE2E2;
-        color: #DC2626;
-        padding: 4px 10px;
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #F87171;
+        border: 1px solid #EF4444;
+        padding: 3px 10px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 700;
     }
     .badge-success {
-        background-color: #DCFCE7;
-        color: #16A34A;
-        padding: 4px 10px;
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #34D399;
+        border: 1px solid #10B981;
+        padding: 3px 10px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 700;
     }
     .badge-info {
-        background-color: #E0F2FE;
-        color: #0284C7;
-        padding: 4px 10px;
+        background-color: rgba(56, 189, 248, 0.2);
+        color: #38BDF8;
+        border: 1px solid #0284C7;
+        padding: 3px 10px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 700;
@@ -101,7 +114,7 @@ SENSITIVITY_CSV = os.path.join(DATA_DIR, "capex_sensitivity_matrix.csv")
 DB_PATH = os.path.join(DATA_DIR, "supply_chain.db")
 
 # ====================================================================
-# Sidebar: Mission Control Navigation
+# Sidebar: Mission Control & Settings
 # ====================================================================
 st.sidebar.markdown("### 🚢 SCM Command Hub")
 st.sidebar.caption("Autonomous Procurement & Risk Sentry")
@@ -117,12 +130,16 @@ nav_choice = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("#### ⚙️ Real-time Pipeline Telemetry")
+st.sidebar.markdown("#### 🔑 Optional LLM Integration")
+api_key_input = st.sidebar.text_input("Enter Groq / OpenAI API Key (Optional):", type="password", help="If provided, LangGraph connects to live LLM APIs. If left empty, it runs using the deterministic neural pattern extractor with zero cost!")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("#### ⚙️ System Telemetry")
 st.sidebar.markdown("""
 - **ML Engine:** `XGBoost Regressor`
 - **Agent Orchestrator:** `LangGraph (Cyclic)`
 - **Database:** `PostgreSQL 16 (Docker)`
-- **Telemetry Scale:** `100,000+ Shipments`
+- **Dataset:** `100,000+ Shipments`
 """)
 
 # Main Header Banner
@@ -144,7 +161,7 @@ with c1:
 with c2:
     st.markdown("""
     <div class="stat-card">
-        <div class="stat-label">XGBoost Accuracy</div>
+        <div class="stat-label">XGBoost Forecast Power</div>
         <div class="stat-number">R² &gt; 0.81</div>
         <span class="badge-success">Target R² &gt; 0.75 PASSED</span>
     </div>
@@ -199,13 +216,13 @@ if nav_choice == "🏢 Supplier Disruption Hub":
                 }
             )
             fig.update_traces(textposition="top center")
-            fig.update_layout(template="plotly_white")
-            st.plotly_chart(fig, use_container_width=True)
+            fig.update_layout(template="plotly_dark", paper_bgcolor="#0A0E17", plot_bgcolor="#111827")
+            st.plotly_chart(fig, width='stretch')
 
         with col2:
             st.markdown("#### Supplier Scorecard Table")
             display_df = df_score[["supplier_name", "country", "on_time_delivery_pct", "avg_delay_days", "disruption_index", "risk_tier"]].copy()
-            st.dataframe(display_df, use_container_width=True, height=400)
+            st.dataframe(display_df, width='stretch', height=400)
     else:
         st.warning("Scorecard dataset not found. Running risk engine...")
         from analytics.risk_index import compute_supplier_risk_scorecard
@@ -264,20 +281,21 @@ elif nav_choice == "🎯 Predictive Delay Engine (XGBoost)":
             mode="gauge+number+delta",
             value=pred["predicted_actual_days"],
             domain={'x': [0, 1], 'y': [0, 1]},
-            title={'text': f"Expected Delivery (Days)<br><span style='font-size:0.8em;color:gray'>Scheduled: {pred['scheduled_days']} Days</span>"},
+            title={'text': f"Expected Delivery (Days)<br><span style='font-size:0.8em;color:#94A3B8'>Scheduled: {pred['scheduled_days']} Days</span>"},
             delta={'reference': pred['scheduled_days'], 'increasing': {'color': "#EF4444"}},
             gauge={
-                'axis': {'range': [0, max(250, pred['predicted_actual_days'] + 50)]},
-                'bar': {'color': "#0284C7"},
+                'axis': {'range': [0, max(250, pred['predicted_actual_days'] + 50)], 'tickcolor': "#94A3B8"},
+                'bar': {'color': "#38BDF8"},
+                'bgcolor': "#1E293B",
                 'steps': [
-                    {'range': [0, pred['scheduled_days']], 'color': "#DCFCE7"},
-                    {'range': [pred['scheduled_days'], pred['scheduled_days'] + 10], 'color': "#FEF08A"},
-                    {'range': [pred['scheduled_days'] + 10, 300], 'color': "#FEE2E2"}
+                    {'range': [0, pred['scheduled_days']], 'color': "#064E3B"},
+                    {'range': [pred['scheduled_days'], pred['scheduled_days'] + 10], 'color': "#854D0E"},
+                    {'range': [pred['scheduled_days'] + 10, 300], 'color': "#7F1D1D"}
                 ]
             }
         ))
-        fig_gauge.update_layout(height=280, margin=dict(l=10, r=10, t=40, b=10))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        fig_gauge.update_layout(height=280, margin=dict(l=10, r=10, t=40, b=10), paper_bgcolor="#0A0E17", font=dict(color="#F8FAFC"))
+        st.plotly_chart(fig_gauge, width='stretch')
 
         if pred["predicted_delay_days"] > 7.0:
             st.error(f"⚠️ **{pred['risk_classification']}**: Expected delivery slippage of **+{pred['predicted_delay_days']} days**.")
@@ -332,20 +350,43 @@ elif nav_choice == "💥 CapEx & Tariff Stress-Test":
             title="CapEx Cost Inflation Heatmap (%) Across 42 Geopolitical Scenarios",
             color_continuous_scale="Reds"
         )
-        fig_heat.update_layout(template="plotly_white")
-        st.plotly_chart(fig_heat, use_container_width=True)
+        fig_heat.update_layout(template="plotly_dark", paper_bgcolor="#0A0E17", plot_bgcolor="#111827")
+        st.plotly_chart(fig_heat, width='stretch')
 
 # ====================================================================
-# Module 4: LangGraph Multi-Agent Audit
+# Module 4: LangGraph Multi-Agent Audit (with Interactive Input)
 # ====================================================================
 elif nav_choice == "🤖 LangGraph Multi-Agent Audit":
     st.subheader("🤖 Autonomous LangGraph Research Engine: Corporate 10-K Audit")
     st.caption("Demonstrates the cyclic data-validation state machine extracting supplier bottleneck disclosures.")
 
+    # Interactive Input Section
+    st.markdown("#### 📝 Analyze Custom Industrial Report / News")
+    user_report_text = st.text_area(
+        "Paste Supplier Disclosure or 10-K Excerpt Below to Run Live Agent:",
+        value="""During Q3 2024, our Grid Technology division experienced significant procurement delays. Specifically, Power Transformers from Bavaria Precision faced an average backlog of 16 weeks due to severe electrical steel shortages and copper raw material price spikes. Subsea HVDC Cables also recorded delivery delays of 8 weeks due to European vessel shortages.""",
+        height=130
+    )
+
+    if st.button("🚀 Run LangGraph Autonomous Audit", type="primary"):
+        with st.spinner("LangGraph Agent executing StateGraph (Ingest -> Extract -> Cyclic Guardrail -> SQL Commit)..."):
+            # Save temporary file and run
+            temp_file = os.path.join(DATA_DIR, "reports_10k", "User_Submitted_Live_Filing.txt")
+            with open(temp_file, "w", encoding="utf-8") as f:
+                f.write(user_report_text)
+            
+            result = build_and_run_langgraph_workflow("User_Submitted_Live_Filing.txt")
+            st.success(f"✅ LangGraph Execution Completed! Validated: {result['validation_passed']} | Committed {result['db_records_inserted']} records.")
+            
+            with st.expander("🔍 View Agent Execution Telemetry (Graph Traversal Logs)"):
+                for l in result["execution_log"]:
+                    st.write(f"- {l}")
+
+    st.markdown("---")
     st.markdown("""
     ```
     ┌───────────────────────┐
-    │ Node: Ingest 10-K     │ ──▶ [Siemens Energy & GE Filings]
+    │ Node: Ingest 10-K     │ ──▶ [Siemens Energy, GE & Custom Filings]
     └───────────┬───────────┘
                 ▼
     ┌───────────────────────┐
@@ -365,12 +406,7 @@ elif nav_choice == "🤖 LangGraph Multi-Agent Audit":
 
     if os.path.exists(DB_PATH):
         conn = sqlite3.connect(DB_PATH)
-        df_audit = pd.read_sql_query("SELECT id, report_name, supplier_name, component_category, reported_delay_weeks, root_cause, confidence_score, extracted_at FROM supplier_bottlenecks", conn)
+        df_audit = pd.read_sql_query("SELECT id, report_name, supplier_name, component_category, reported_delay_weeks, root_cause, confidence_score, extracted_at FROM supplier_bottlenecks ORDER BY id DESC", conn)
         conn.close()
         st.markdown("#### Live Verified Disclosures in Database:")
-        st.dataframe(df_audit, use_container_width=True)
-    else:
-        st.info("Triggering LangGraph Multi-Agent Engine...")
-        from agent.graph import run_all_filings
-        run_all_filings()
-        st.rerun()
+        st.dataframe(df_audit, width='stretch')
