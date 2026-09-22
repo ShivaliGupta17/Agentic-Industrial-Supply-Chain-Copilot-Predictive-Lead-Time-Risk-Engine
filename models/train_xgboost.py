@@ -81,7 +81,7 @@ def train_lead_time_model():
 
         preds = model.predict(X_test)
         r2 = float(r2_score(y_test, preds))
-        rmse = float(mean_squared_error(y_test, preds, squared=False))
+        rmse = float(np.sqrt(mean_squared_error(y_test, preds)))
         mae = float(mean_absolute_error(y_test, preds))
 
         feature_importances = dict(zip(X.columns, [round(float(v), 4) for v in model.feature_importances_]))
